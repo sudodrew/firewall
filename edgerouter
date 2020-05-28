@@ -1,0 +1,258 @@
+set firewall all-ping enable
+set firewall broadcast-ping disable
+set firewall group network-group PRIVATE_NETS network 192.168.0.0/16
+set firewall group network-group PRIVATE_NETS network 172.16.0.0/12
+set firewall group network-group PRIVATE_NETS network 10.0.0.0/8
+set firewall ipv6-receive-redirects disable
+set firewall ipv6-src-route disable
+set firewall ip-src-route disable
+set firewall log-martians disable
+set firewall modify balance rule 10 action modify
+set firewall modify balance rule 10 description 'do NOT load balance lan to lan'
+set firewall modify balance rule 10 destination group network-group PRIVATE_NETS
+set firewall modify balance rule 10 modify table main
+set firewall modify balance rule 20 action modify
+set firewall modify balance rule 20 description 'do NOT load balance destination public address'
+set firewall modify balance rule 20 destination group address-group ADDRv4_eth0
+set firewall modify balance rule 20 modify table main
+set firewall modify balance rule 30 action modify
+set firewall modify balance rule 30 description 'do NOT load balance destination public address'
+set firewall modify balance rule 30 destination group address-group ADDRv4_eth1
+set firewall modify balance rule 30 modify table main
+set firewall modify balance rule 40 action modify
+set firewall modify balance rule 40 description 'do NOT load balance destination public address'
+set firewall modify balance rule 40 destination group address-group ADDRv4_eth2
+set firewall modify balance rule 40 modify table main
+set firewall modify balance rule 110 action modify
+set firewall modify balance rule 110 modify lb-group G
+set firewall name WAN_IN default-action drop
+set firewall name WAN_IN description 'WAN to internal'
+set firewall name WAN_IN rule 10 action accept
+set firewall name WAN_IN rule 10 description 'Allow established/related'
+set firewall name WAN_IN rule 10 state established enable
+set firewall name WAN_IN rule 10 state related enable
+set firewall name WAN_IN rule 20 action accept
+set firewall name WAN_IN rule 20 description amcrest
+set firewall name WAN_IN rule 20 destination port 13777
+set firewall name WAN_IN rule 20 log disable
+set firewall name WAN_IN rule 20 protocol tcp_udp
+set firewall name WAN_IN rule 30 action accept
+set firewall name WAN_IN rule 30 description openvpn
+set firewall name WAN_IN rule 30 destination port 1194
+set firewall name WAN_IN rule 30 log disable
+set firewall name WAN_IN rule 30 protocol tcp_udp
+set firewall name WAN_IN rule 40 action accept
+set firewall name WAN_IN rule 40 description 'blue iris'
+set firewall name WAN_IN rule 40 destination port 80
+set firewall name WAN_IN rule 40 log disable
+set firewall name WAN_IN rule 40 protocol tcp_udp
+set firewall name WAN_IN rule 50 action accept
+set firewall name WAN_IN rule 50 description parsec
+set firewall name WAN_IN rule 50 destination port 8000-8035
+set firewall name WAN_IN rule 50 log disable
+set firewall name WAN_IN rule 50 protocol tcp_udp
+set firewall name WAN_IN rule 60 action drop
+set firewall name WAN_IN rule 60 description 'Drop invalid state'
+set firewall name WAN_IN rule 60 state invalid enable
+set firewall name WAN_LOCAL default-action drop
+set firewall name WAN_LOCAL description 'WAN to router'
+set firewall name WAN_LOCAL rule 10 action accept
+set firewall name WAN_LOCAL rule 10 description 'Allow established/related'
+set firewall name WAN_LOCAL rule 10 state established enable
+set firewall name WAN_LOCAL rule 10 state related enable
+set firewall name WAN_LOCAL rule 20 action drop
+set firewall name WAN_LOCAL rule 20 description 'Drop invalid state'
+set firewall name WAN_LOCAL rule 20 state invalid enable
+set firewall receive-redirects disable
+set firewall send-redirects enable
+set firewall source-validation disable
+set firewall syn-cookies enable
+set interfaces ethernet eth0 address dhcp
+set interfaces ethernet eth0 description WAN
+set interfaces ethernet eth0 duplex auto
+set interfaces ethernet eth0 firewall in
+set interfaces ethernet eth0 firewall local name WAN_LOCAL
+set interfaces ethernet eth0 firewall out
+set interfaces ethernet eth0 poe output off
+set interfaces ethernet eth0 speed auto
+set interfaces ethernet eth1 address 67.52.162.18/28
+set interfaces ethernet eth1 address 67.52.162.19/28
+set interfaces ethernet eth1 address 67.52.162.20/28
+set interfaces ethernet eth1 address 67.52.162.21/28
+set interfaces ethernet eth1 description 'WAN 2'
+set interfaces ethernet eth1 duplex auto
+set interfaces ethernet eth1 firewall in name WAN_IN
+set interfaces ethernet eth1 firewall local name WAN_LOCAL
+set interfaces ethernet eth1 poe output off
+set interfaces ethernet eth1 speed auto
+set interfaces ethernet eth2 address dhcp
+set interfaces ethernet eth2 description 'WAN 3'
+set interfaces ethernet eth2 duplex auto
+set interfaces ethernet eth2 firewall in name WAN_IN
+set interfaces ethernet eth2 firewall local name WAN_LOCAL
+set interfaces ethernet eth2 speed auto
+set interfaces ethernet eth3 duplex auto
+set interfaces ethernet eth3 speed auto
+set interfaces ethernet eth4 address 192.168.128.1/24
+set interfaces ethernet eth4 description Local
+set interfaces ethernet eth4 duplex auto
+set interfaces ethernet eth4 firewall in modify balance
+set interfaces ethernet eth4 speed auto
+set interfaces ethernet eth5 duplex auto
+set interfaces ethernet eth5 speed auto
+set interfaces loopback lo
+set load-balance group G interface eth0
+set load-balance group G interface eth1
+set load-balance group G interface eth2
+set load-balance group G lb-local enable
+set load-balance group G lb-local-metric-change disable
+set protocols static route 0.0.0.0/0 next-hop 67.52.162.17
+set protocols static route 192.168.5.0/24 next-hop 192.168.128.49 description VDI
+set protocols static route 192.168.5.0/24 next-hop 192.168.128.49 distance 1
+set protocols static route 192.168.87.0/24 next-hop 192.168.128.49 description Cool.87
+set protocols static route 192.168.88.0/24 next-hop 192.168.128.49 description Colo.88
+set protocols static route 192.168.129.0/24 next-hop 192.168.128.49 description Colo
+set protocols static route 192.168.129.0/24 next-hop 192.168.128.49 distance 1
+set service dhcp-server disabled false
+set service dhcp-server hostfile-update disable
+set service dhcp-server shared-network-name LAN authoritative enable
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 default-router 192.168.128.1
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 dns-server 4.2.2.1
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 dns-server 4.2.2.2
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 lease 86400
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 start 192.168.128.150 stop 192.168.128.243
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping BRW9453300A48DA ip-address 192.168.128.193
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping BRW9453300A48DA mac-address '94:53:30:0a:48:da'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping CCTV ip-address 192.168.128.51
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping CCTV mac-address 'fc:aa:14:99:ba:76'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping cam1 ip-address 192.168.128.58
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping cam1 mac-address '9c:8e:cd:06:aa:8a'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping cam2 ip-address 192.168.128.59
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping cam2 mac-address '3c:ef:8c:6f:40:df'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping common-are ip-address 192.168.128.2
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping common-are mac-address '74:83:c2:df:09:47'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping common-area ip-address 192.168.128.61
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping common-area mac-address 'a4:da:22:36:4a:03'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping drewgaming ip-address 192.168.128.128
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping drewgaming mac-address '52:54:00:37:ce:34'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping drewnas ip-address 192.168.128.48
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping drewnas mac-address '00:11:32:c2:03:39'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping dvr ip-address 192.168.128.56
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping dvr mac-address '4c:11:bf:60:02:f0'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping garage ip-address 192.168.128.60
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping garage mac-address '2c:aa:8e:23:25:f4'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping meraki ip-address 192.168.128.49
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping meraki mac-address '0c:8d:db:c3:44:f8'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping morgans-room ip-address 192.168.128.63
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping morgans-room mac-address '2c:aa:8e:23:25:fa'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping notsure ip-address 192.168.128.111
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping notsure mac-address 'c8:02:8f:7c:53:11'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping rowans-room ip-address 192.168.128.62
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 static-mapping rowans-room mac-address '2c:aa:8e:23:27:c6'
+set service dhcp-server shared-network-name LAN subnet 192.168.128.0/24 unifi-controller 192.168.128.2
+set service dhcp-server static-arp disable
+set service dhcp-server use-dnsmasq disable
+set service dns forwarding cache-size 150
+set service dns forwarding listen-on eth4
+set service gui http-port 80
+set service gui https-port 443
+set service gui older-ciphers enable
+set service nat rule 1 description amcrest
+set service nat rule 1 destination address 67.52.162.21
+set service nat rule 1 destination port 13777
+set service nat rule 1 inbound-interface eth1
+set service nat rule 1 inside-address address 192.168.128.56
+set service nat rule 1 inside-address port 13777
+set service nat rule 1 log disable
+set service nat rule 1 protocol tcp_udp
+set service nat rule 1 source
+set service nat rule 1 type destination
+set service nat rule 2 description 'blue iris'
+set service nat rule 2 destination address 67.52.162.21
+set service nat rule 2 destination port 80
+set service nat rule 2 inbound-interface eth1
+set service nat rule 2 inside-address address 192.168.128.51
+set service nat rule 2 inside-address port 80
+set service nat rule 2 log disable
+set service nat rule 2 protocol tcp_udp
+set service nat rule 2 type destination
+set service nat rule 3 description openvpn
+set service nat rule 3 destination address 67.52.162.21
+set service nat rule 3 destination port 1194
+set service nat rule 3 inbound-interface eth1
+set service nat rule 3 inside-address address 192.168.128.50
+set service nat rule 3 inside-address port 1194
+set service nat rule 3 log disable
+set service nat rule 3 protocol tcp_udp
+set service nat rule 3 type destination
+set service nat rule 4 description parsec
+set service nat rule 4 destination address 67.52.162.21
+set service nat rule 4 destination port 8000-8025
+set service nat rule 4 inbound-interface eth1
+set service nat rule 4 inside-address address 192.168.128.52
+set service nat rule 4 inside-address port 8000-8025
+set service nat rule 4 log disable
+set service nat rule 4 protocol tcp_udp
+set service nat rule 4 type destination
+set service nat rule 5 description parsec
+set service nat rule 5 destination address 67.52.162.21
+set service nat rule 5 destination port 8025-8035
+set service nat rule 5 inbound-interface eth1
+set service nat rule 5 inside-address address 192.168.128.195
+set service nat rule 5 inside-address port 8025-8035
+set service nat rule 5 log disable
+set service nat rule 5 protocol tcp_udp
+set service nat rule 5 type destination
+set service nat rule 6 description 'DNS Redirect'
+set service nat rule 6 inbound-interface eth0
+set service nat rule 6 inside-address address 192.168.128.1
+set service nat rule 6 inside-address port 53
+set service nat rule 6 log disable
+set service nat rule 6 protocol tcp_udp
+set service nat rule 6 type destination
+set service nat rule 7 description 'DNS Redirect'
+set service nat rule 7 inbound-interface eth1
+set service nat rule 7 inside-address address 192.168.128.1
+set service nat rule 7 inside-address port 53
+set service nat rule 7 log disable
+set service nat rule 7 protocol tcp_udp
+set service nat rule 7 type destination
+set service nat rule 8 description 'DNS Redirect'
+set service nat rule 8 inbound-interface eth2
+set service nat rule 8 inside-address address 192.168.128.1
+set service nat rule 8 inside-address port 53
+set service nat rule 8 log disable
+set service nat rule 8 protocol tcp_udp
+set service nat rule 8 type destination
+set service nat rule 5000 description 'masquerade for WAN'
+set service nat rule 5000 outbound-interface eth0
+set service nat rule 5000 type masquerade
+set service nat rule 5002 description 'masquerade for WAN 2'
+set service nat rule 5002 outbound-interface eth1
+set service nat rule 5002 type masquerade
+set service nat rule 5004 description 'masquerade for WAN 3'
+set service nat rule 5004 outbound-interface eth2
+set service nat rule 5004 type masquerade
+set service ssh port 22
+set service ssh protocol-version v2
+set service unms disable
+set system conntrack expect-table-size 4096
+set system conntrack hash-size 4096
+set system conntrack table-size 32768
+set system conntrack tcp half-open-connections 512
+set system conntrack tcp loose enable
+set system conntrack tcp max-retrans 3
+set system host-name ubnt
+set system login user ubnt authentication encrypted-password '$6$YQSm.lNhv$c.y8c0LUOii8.CC.gGNJpG5zkej3OMtrnFl.MytzBrOvlCI0q5R4kFmcFGP1bYv2ciuK1W6qkMsqlu/hboYvJ0'
+set system login user ubnt level admin
+set system name-server 4.2.2.1
+set system name-server 4.2.2.2
+set system ntp server 0.ubnt.pool.ntp.org
+set system ntp server 1.ubnt.pool.ntp.org
+set system ntp server 2.ubnt.pool.ntp.org
+set system ntp server 3.ubnt.pool.ntp.org
+set system syslog global facility all level notice
+set system syslog global facility protocols level debug
+set system time-zone UTC
+set system traffic-analysis dpi disable
+set system traffic-analysis export disable
